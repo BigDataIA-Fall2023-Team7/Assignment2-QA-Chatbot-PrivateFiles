@@ -1,0 +1,336 @@
+{
+	"info": {
+		"_postman_id": "755d1728-9503-4dca-a0fe-f2bd462ba9b5",
+		"name": "damg7245-assgn2-chatbot-private-files",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13184414"
+	},
+	"item": [
+		{
+			"name": "Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create FineTune Model",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"referencePDFLinks\":[\n        \"1.pdf\",\n        \"2.pdf\"\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/createFineTuneModel",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"createFineTuneModel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create FineTune Model - No Body",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/createFineTuneModel",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"createFineTuneModel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create FineTune Model - No referencePDFLinks",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/createFineTuneModel",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"createFineTuneModel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create FineTune Model - referencePDFLinks not List",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"referencePDFLinks\": \"1.pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/createFineTuneModel",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"createFineTuneModel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create FineTune Model - referencePDFLinks Empty list",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"referencePDFLinks\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/createFineTuneModel",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"createFineTuneModel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create FineTune Model - Happy Case",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"referencePDFLinks\": [\"1.pdf\", \"2.pdf\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/createFineTuneModel",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"createFineTuneModel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Chat Answer - No Body",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/getChatAnswer",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"getChatAnswer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Chat Answer - No chatQuestion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/getChatAnswer",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"getChatAnswer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Chat Answer - chatQuestion not string",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"chatQuestion\": 123\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/getChatAnswer",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"getChatAnswer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Chat Answer - chatQuestion empty string",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"chatQuestion\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/getChatAnswer",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"getChatAnswer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Chat Answer - Happy Case",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"chatQuestion\": \"Can you tell me who is president of USA?\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/v1/getChatAnswer",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"v1",
+						"getChatAnswer"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
