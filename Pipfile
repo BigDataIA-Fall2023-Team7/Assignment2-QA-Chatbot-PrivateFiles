@@ -5,6 +5,14 @@ name = "pypi"
 
 [packages]
 fastapi = "*"
+requests = "*"
+python-dotenv = "*"
+pypdf = "*"
+pandas = "*"
+openai = "*"
+tiktoken = "*"
+scipy = "*"
+httpx = "*"
 
 [dev-packages]
 uvicorn = "*"
