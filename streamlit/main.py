@@ -44,7 +44,7 @@ else:
     else:
         if pdf_processor=="PyPDF" or pdf_processor=="Nougat":
             # Process PDFs
-            if st.button("Generate Model",key="model_success"):
+            if st.button("Process",key="model_success"):
                 create_model_api_url = "http://127.0.0.1:8000/v1/createFineTuneModel"
                 # Create the fine-tuned model
                 create_model_response = requests.post(create_model_api_url, json={"referencePDFLinks": pdf_links_list})
