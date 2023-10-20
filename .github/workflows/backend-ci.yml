@@ -27,9 +27,10 @@ jobs:
         name: Run tests
         working-directory: . # TODO: change to your pytest path
         run: |
-          pipenv install --dev 
-          pipenv run coverage run -m pytest -v backend/fastapiservice/test
-          pipenv run coverage report -m
+          pipenv install --dev -v backend/fastapiservice/test
+          pipenv run -m pytest 
+        #   pipenv run coverage run -m pytest -v backend/fastapiservice/test
+        #   pipenv run coverage report -m
         # pipenv install -r requirements.txt
         # To run the pytest without coverage report
         # pipenv run pytest -v .
