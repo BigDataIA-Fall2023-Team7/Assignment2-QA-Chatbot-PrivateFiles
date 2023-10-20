@@ -65,12 +65,12 @@ frontend
 1. Nougat Library - [link](https://facebookresearch.github.io/nougat/)
 2. SEC Forms - [link](https://www.sec.gov/forms)
 3. PyPDF Documentation - [link](https://pypdf.readthedocs.io/en/stable/)
-4. Open AI Cookbook - [link] (https://github.com/openai/openai-cookbook/tree/main/examples/fine-tuned_qa)
+4. Open AI Cookbook - [link](https://github.com/openai/openai-cookbook/tree/main/examples/fine-tuned_qa)
 5. Streamlit - [link](https://streamlit.io/)
 
 ## Architecture 👷🏻‍♂️
 
-![alt text](Architecture.png)
+![alt text](frontend/images/qa_chatbot_for_pdfs_architecture.png)
 
 ## Project Workflow
 
