@@ -121,6 +121,9 @@ def chat(chatQuestion: ChatQuestion):
         """
         TODO: Run the process to create the model.
         """
+        print("@Computing chatAnswer@")
+        print("Current Working Directory : " + os.getcwd())
+        print("Current FILE_CACHE location : " + FILE_CACHE)
         SearchContextFile = FILE_CACHE + 'CombinedChunksDF.csv'
         chatanswer = ask(chatQuestion.chatQuestion, SearchContextFile, FT_MODEL)
                 
