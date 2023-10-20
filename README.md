@@ -101,13 +101,13 @@ frontend
 
 ## Steps to Execute
 
-App can be directly accessed from Streamlit Cloud via [link](https://team7-a1-part2.streamlit.app/)
+App can be directly accessed from Streamlit Cloud via [link](https://team7-a2-frontend.streamlit.app/)
 
 *OR*
 
 1. **Clone the Repository**
 
-    Clone the [repository](https://github.com/BigDataIA-Fall2023-Team7/Assignment1-PDF-Processing-Application.git) to your local machine:
+    Clone the [repository](https://github.com/BigDataIA-Fall2023-Team7/Assignment2-QA-Chatbot-PrivateFiles) to your local machine:
    ```
    git clone <repository_url>
    ```
