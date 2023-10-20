@@ -1,1 +1,1 @@
-web: gunicorn fastapiservice:src:app
+web: gunicorn fastapiservice:src:app -w 4 -k uvicorn.workers.UvicornWorker
