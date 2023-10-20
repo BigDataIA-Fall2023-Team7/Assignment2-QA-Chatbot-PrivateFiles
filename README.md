@@ -62,11 +62,12 @@ frontend
 ```
 
 ## Links 📎
-1. Nougat Library - [link](https://facebookresearch.github.io/nougat/)
-2. SEC Forms - [link](https://www.sec.gov/forms)
-3. PyPDF Documentation - [link](https://pypdf.readthedocs.io/en/stable/)
-4. Open AI Cookbook - [link](https://github.com/openai/openai-cookbook/tree/main/examples/fine-tuned_qa)
-5. Streamlit - [link](https://streamlit.io/)
+1. Codelab Doc - [link](https://codelabs-preview.appspot.com/?file_id=1GZnCnwqlNUug0sMdtQ-UlrRjIQoFD-XferMC06DVpyc#0)
+2. Nougat Library - [link](https://facebookresearch.github.io/nougat/)
+3. SEC Forms - [link](https://www.sec.gov/forms)
+4. PyPDF Documentation - [link](https://pypdf.readthedocs.io/en/stable/)
+5. Open AI Cookbook - [link](https://github.com/openai/openai-cookbook/tree/main/examples/fine-tuned_qa)
+6. Streamlit - [link](https://streamlit.io/)
 
 ## Architecture 👷🏻‍♂️
 
