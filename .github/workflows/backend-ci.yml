@@ -3,7 +3,7 @@ name: backend-ci # TODO: change to your workflow name
 on:  
   push:
     branches:
-      - master
+      - main
 
 jobs:
   unit-tests:
