@@ -14,10 +14,10 @@ tiktoken = "*"
 scipy = "*"
 httpx = "*"
 gunicorn = "*"
+uvicorn = "*"
 
 [dev-packages]
 pytest-cov = "*"
-uvicorn = "*"
 
 [requires]
 python_version = "3.11"
