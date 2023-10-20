@@ -162,3 +162,4 @@ cython_debug/
 poc/
 dump/
 .DS_Store
+.frontend_venv/

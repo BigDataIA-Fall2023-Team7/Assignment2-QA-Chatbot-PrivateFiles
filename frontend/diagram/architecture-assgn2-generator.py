@@ -6,7 +6,7 @@ from diagrams.programming.language import Python
 from diagrams.programming.framework import FastAPI
 
 # Create a new diagram
-with Diagram("Personal ChatBot Architecture", show=False, direction="LR", outformat="png") as diagram:
+with Diagram("QA Chatbot for PDFs Architecture", show=False, direction="LR", outformat="png") as diagram:
     
     # Define the user and Streamlit App
     with Cluster("User / Streamlit App"):

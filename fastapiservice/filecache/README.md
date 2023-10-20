@@ -1,1 +1,0 @@
-This is filecache location for API Server

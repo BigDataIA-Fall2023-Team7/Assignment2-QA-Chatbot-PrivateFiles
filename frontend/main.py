@@ -1,13 +1,18 @@
 import streamlit as st
 import re
 import requests
-import PyPDF2
 import io
 import time
 import datetime
+import os
+
+FASTAPI_SERVER_URL = st.secrets['FASTAPI_SERVER_URL']
+
+#To set the page configurations
+st.set_page_config(page_title="Asn2", page_icon='❷', layout="wide", initial_sidebar_state="auto", menu_items=None)
 
 # Initialize Streamlit
-st.title("PDF Processor and Personal ChatBot")
+st.title("Q&A Chatbot for PDFs")
 
 # PDF Link Validator
 pdf_link_validator = re.compile(r'https?://\S+$')
@@ -45,9 +50,15 @@ else:
         if pdf_processor=="PyPDF" or pdf_processor=="Nougat":
             # Process PDFs
             if st.button("Process",key="model_success"):
-                create_model_api_url = "http://127.0.0.1:8000/v1/createFineTuneModel"
+                create_model_api_url = f"{FASTAPI_SERVER_URL}/v1/createFineTuneModel"
+
+                create_model_response = None
                 # Create the fine-tuned model
-                create_model_response = requests.post(create_model_api_url, json={"referencePDFLinks": pdf_links_list})
+                if pdf_processor=="PyPDF":
+                    create_model_response = requests.post(create_model_api_url, json={"referencePDFLinks": pdf_links_list})
+                elif pdf_processor=="Nougat":
+                    create_model_response = requests.post(create_model_api_url, json={"referencePDFLinks": pdf_links_list, 'nougatAPIServerURL':nougatAPIServerURL})
+                
                 if create_model_response.status_code == 201:
                     st.success("Fine-tuned model created successfully.")
                 else:
@@ -63,7 +74,7 @@ for message in st.session_state.messages:
 
 if user_question:= st.chat_input("Ask a question"):
         # Make a POST request to the FastAPI endpoint for a single question
-        chat_answer_api_url = "http://127.0.0.1:8000/v1/getChatAnswer"
+        chat_answer_api_url = f"{FASTAPI_SERVER_URL}/v1/getChatAnswer"
         st.session_state.messages.append({"role": "user", "content": user_question})
         with st.chat_message("user"):
             st.markdown(user_question)
