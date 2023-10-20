@@ -1,14 +1,19 @@
 import requests
 from pypdf import PdfReader
+import re
 import io
 import os
 import re
 import datetime
+import tiktoken
+import pandas as pd
 from dotenv import load_dotenv
 load_dotenv()
 from .utilities.customexception import CustomException
 
 FILE_CACHE = os.getenv("FILE_CACHE")
+TOKEN_LIMIT = int(os.getenv("TOKEN_LIMIT"))
+GPT_MODEL = os.getenv("GPT_MODEL")
 
 class ProcessPDF:
 
@@ -16,9 +21,16 @@ class ProcessPDF:
         self.inputPDFLink = inputPDFLink.strip()
         self.downloadedPDFLocation = ""
         self.processedPDFLocation = ""
+        self.pdfname = ""
+        self.chunkFileLocation = ""
         if len(args) == 1:
             self.nougatAPIServerURL = args[0].strip()
 
+    def num_tokens(self,text: str, model: str = GPT_MODEL) -> int:
+        """Return the number of tokens in a string."""
+        encoding = tiktoken.encoding_for_model(model)
+        return len(encoding.encode(text))
+    
     def getDownloadedPDFLocation(self):
         return self.downloadedPDFLocation
     
@@ -50,7 +62,16 @@ class ProcessPDF:
 
         current_datetime = datetime.datetime.now()
         formatted_datetime = current_datetime.strftime("%m_%d_%Y_%H_%M_%S")
-        pdf_filename =  "InputPDF_" + formatted_datetime + fileid +  ".pdf"
+        # pdf_filename =  "InputPDF_" + formatted_datetime + fileid +  ".pdf"
+
+        match = re.search(r'\/([^/]+\.pdf)$', self.inputPDFLink)
+        if match:
+            pdf_filename =  match.group(1)
+        else:
+            pdf_filename =  "InputPDF_" + fileid +  ".pdf"
+
+        self.pdfname = pdf_filename
+
 
         try:
             response = requests.get(self.inputPDFLink)
@@ -80,7 +101,8 @@ class ProcessPDF:
                     with open(FILE_CACHE + mmd_filename, 'w') as file:
                         file.write(contents)
                     self.processedPDFLocation = mmd_filename
-                    return {"message":"PDF Processing Successful via PyPDF", "details":{'status':'201', 'message':"Successfully processed PDF using Nougat",'referenceLink':self.inputPDFLink}}
+                    print("PyPDF Processing Done")
+                    return {"message":"PDF Processing Successful via PyPDF", "details":{'status':'201', 'message':"Successfully processed PDF using PyPDF",'referenceLink':self.inputPDFLink}}
             except Exception as e:
                 return {"message":"Problem Processing PDF via PyPDF", "details":{'referenceLink':self.inputPDFLink, 'error':str(e)}}
         
@@ -102,6 +124,7 @@ class ProcessPDF:
                         with open(FILE_CACHE + mmd_filename, 'w') as file:
                             file.write(cleanData)
                         self.processedPDFLocation = mmd_filename
+                        print("Nougat Processing Done")
                         return {'message':"PDF Processing Successful via Nougat", "details":{'status':'201', 'message':"Successfully processed PDF using Nougat",'referenceLink':self.inputPDFLink}}
                     elif response.status_code == 404:
                         self.deleteFileFromFileCache(pdf_filename)
@@ -121,7 +144,164 @@ class ProcessPDF:
                     #raise(CustomException(message="Connection Lost", details={'status':'500', 'message':"Connection to Nougat API Server lost! Check if the server is active or if the API URL is correct", 'referenceLink':self.inputPDFLink, 'error':str(e)})) 
         
     def chunkPDF(self):
-        pass
+
+        print("Chunking MMD")
+        semantics_df_rows = []
+        semantics_df_headers = ["FormName", "ParaNumber", "ParaContent", "ParaCharacterCount", "ParaSemantics", "Section", "TokenCount", "CummulativeTokenCount"]
+            
+        mmdFileLocation = FILE_CACHE + self.processedPDFLocation
+        with open(mmdFileLocation, 'r') as file:
+            mmdFileContents = file.read()
+
+        print('Cleaning MMD Contents')
+
+        #Cleaning Tables and Warnings in MMD File
+
+        #Cleaning Tables
+        pattern = r'\\begin{tabular}.*?\n'
+        print(f"Tables Identified : {len(re.findall(pattern, mmdFileContents))}")
+        mmdFileContents = re.sub(pattern, '\n',mmdFileContents)
+
+        pattern = r'\\end{tabular}.*?\n'
+        mmdFileContents = re.sub(pattern, '\n',mmdFileContents)
+
+        pattern = r'\\begin{table}.*?\n'
+        print(f"Tables Identified : {len(re.findall(pattern, mmdFileContents))}")
+        mmdFileContents = re.sub(pattern, '\n',mmdFileContents)
+
+        pattern = r'\\end{table}.*?\n'
+        mmdFileContents = re.sub(pattern, '\n',mmdFileContents)
+
+        #Cleaning Warnings
+        pattern = r'\+\+\+(.*?)\+\+\+'
+        print(f"Warnings Identified : {len(re.findall(pattern, mmdFileContents, re.DOTALL))}")
+        mmdFileContents = re.sub(pattern, '\n',mmdFileContents,flags=re.DOTALL)
+
+        listOfParagraphs = mmdFileContents.split("\n")
+
+        listOfParagraphsAfterCleaning = []
+        cummulativetokencount = 0
+        with open(f'{mmdFileLocation}.log', 'w') as f:
+            for i, paragraph in enumerate(listOfParagraphs):
+                if len(paragraph)!=0:
+                    listOfParagraphsAfterCleaning.append(paragraph)
+
+                    #TokenCount for each row in semantics_df
+                    tokencount = self.num_tokens(paragraph, GPT_MODEL)
+                    cummulativetokencount+=tokencount
+
+                    #Compute ParaSemantics in semantics_df
+                    #["FormName", "ParaNumber", "ParaContent", "ParaCharacterCount", "ParaSemantics"]
+                    
+                    if paragraph.startswith("###"):
+                        parasemantics = "Heading3"
+                    elif paragraph.startswith("##"):
+                        parasemantics = "Heading2"
+                    elif paragraph.startswith("#"):
+                        parasemantics = "Heading1"
+                    elif paragraph.startswith("**"):
+                        parasemantics = "Bold"
+                    elif paragraph.startswith("*"):
+                        parasemantics = "Bullet"
+                    else:
+                        parasemantics = "Paragraph"
+                    semantics_df_rows.append([self.processedPDFLocation[:-4], i, paragraph, len(paragraph), parasemantics, None, tokencount, cummulativetokencount])
+
+
+                    f.write(f"P{str(i)} : {len(paragraph)}\n{paragraph}\n\n@@@\n\n")
+
+        semantics_df = pd.DataFrame(data=semantics_df_rows, columns=semantics_df_headers)
+
+        currentsectionnumber = 0
+        firstheading = False
+
+        for index, row in semantics_df.iterrows():
+            if (row['ParaSemantics'] not in ["Heading3", "Heading2", "Heading1"]) and (firstheading!=True):
+                currentsectionnumber+=1
+                semantics_df.iloc[index, semantics_df.columns.get_loc('Section')] = currentsectionnumber
+            elif (firstheading==True) and (row['ParaSemantics'] not in ["Heading3", "Heading2", "Heading1"]):
+                 semantics_df.iloc[index, semantics_df.columns.get_loc('Section')] = currentsectionnumber
+            else:
+                firstheading = True
+                currentsectionnumber+=1
+                semantics_df.iloc[index, semantics_df.columns.get_loc('Section')] = currentsectionnumber
+
+        semantics_df.to_csv(FILE_CACHE + f"{self.pdfname[:-4]}_semantics_df.csv", index=False, header=True)
+        print("Generated Semantics File in FILE_CACHE")
+
+        section_df = semantics_df.groupby('Section')['ParaContent'].agg('\n'.join).reset_index()
+        section_df.rename(columns={'ParaContent': 'Chunk'}, inplace=True)
+        section_df['TokenCount'] = section_df['Chunk'].apply(self.num_tokens, args=(GPT_MODEL,))
+        section_df['CummulativeTokenCount'] = section_df['TokenCount'].cumsum()
+        section_df.to_csv(FILE_CACHE + f"{self.pdfname[:-4]}_sections_df.csv", index=False, header=True)
+
+        chunk_df_rows = []
+        chunk_df_headers = ["Chunk", "TokenCount", "CummulativeTokenCount"]
+        oversized_sections = []
+
+        current_chunk_buffer = ""
+        current_chunk_buffer_tokens=0
+        for i, row in section_df.iterrows():
+            if row['TokenCount'] > TOKEN_LIMIT:
+                oversized_sections.append(row['Chunk'])
+                if current_chunk_buffer!="":
+                    chunk_df_rows.append([current_chunk_buffer, None, None])
+                    current_chunk_buffer=""
+
+            elif row['TokenCount'] + current_chunk_buffer_tokens < TOKEN_LIMIT:
+                current_chunk_buffer = current_chunk_buffer + "\n" + row['Chunk']
+            else:
+                chunk_df_rows.append([current_chunk_buffer, None, None])
+                current_chunk_buffer = row['Chunk']
+            current_chunk_buffer_tokens = self.num_tokens(current_chunk_buffer,GPT_MODEL)
+            
+        if current_chunk_buffer!="":
+            chunk_df_rows.append([current_chunk_buffer, None, None])
+
+        chunk_df = pd.DataFrame(data=chunk_df_rows, columns=chunk_df_headers)
+        chunk_df['TokenCount']=chunk_df["Chunk"].apply(self.num_tokens, args=(GPT_MODEL,))
+
+        print("Generated Initial Chunk File in FILE_CACHE")
+
+        if len(oversized_sections)!=0:
+            for oversized_section in oversized_sections:
+                common_shared_heading = ""
+                oversizedDf_headers = ["Sentence", "TokenCount", "CummulativeTokenCount"]
+                pattern = r'(.*?)\n'
+                sentences = re.split(pattern, oversized_section)
+                oversizedDf_rows = [[s.strip(), self.num_tokens(s.strip(), GPT_MODEL), None] for s in sentences if s.strip()]
+                oversizedDf = pd.DataFrame(data=oversizedDf_rows, columns=oversizedDf_headers)
+                if oversizedDf.iloc[0]['Sentence'].startswith('#'):
+                    common_shared_heading = oversizedDf.iloc[0]['Sentence']
+                    oversizedDf = oversizedDf.drop(0)
+
+                oversizedDf_rows = []
+                current_chunk_buffer = common_shared_heading
+                current_chunk_buffer_tokens=0
+                for i, row in oversizedDf.iterrows():
+                    if row['TokenCount'] + current_chunk_buffer_tokens < TOKEN_LIMIT:
+                        current_chunk_buffer = current_chunk_buffer + '\n' + row["Sentence"]
+                    else:
+                        oversizedDf_rows.append([current_chunk_buffer, None, None])
+                        current_chunk_buffer = common_shared_heading + row['Sentence']
+
+                    current_chunk_buffer_tokens = self.num_tokens(current_chunk_buffer,GPT_MODEL)
+
+                if current_chunk_buffer!="":
+                    oversizedDf_rows.append([current_chunk_buffer, None, None])
+                
+                tempDf = pd.DataFrame(data=oversizedDf_rows, columns=["Chunk", "TokenCount", "CummulativeTokenCount"])
+                tempDf['TokenCount'] = tempDf['Chunk'].apply(self.num_tokens, args=(GPT_MODEL,))
+                chunk_df = pd.concat([chunk_df, tempDf], ignore_index=True)
+                print("Updated Chunk File for oversized sections in FILE_CACHE")
+
+
+        chunk_df['CummulativeTokenCount']=chunk_df["TokenCount"].cumsum()
+        chunk_df.to_csv(FILE_CACHE + f"{self.pdfname[:-4]}_chunks_df.csv", index=False, header=True)
+        self.chunkFileLocation = f"{self.pdfname[:-4]}_chunks_df.csv"
+        print("Chunking Complete")
+        return {'message':"MMD Chunking Successful", "details":{'status':'201', 'message':"Successfully chunked processed mmd",'referenceLink':self.inputPDFLink, 'chunkFileLocation':self.chunkFileLocation, 'formname':self.pdfname[:-4]}}
+
     
     def generateQuestions(self):
         pass

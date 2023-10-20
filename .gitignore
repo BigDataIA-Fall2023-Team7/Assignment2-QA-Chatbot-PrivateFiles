@@ -162,3 +162,11 @@ cython_debug/
 poc/
 dump/
 .DS_Store
+
+fastapiservice/filecache/*.csv
+fastapiservice/filecache/*.mmd
+fastapiservice/filecache/*.log
+fastapiservice/filecache/*.pdf
+
+*.mmd
+text
