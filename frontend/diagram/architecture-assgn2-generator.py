@@ -15,20 +15,21 @@ with Diagram("QA Chatbot for PDFs Architecture", show=False, direction="LR", out
 
     # Define FastAPI and sub-processes
     with Cluster("PDF Processor"):
-        fastapi = FastAPI("FastAPI")
+        fastapi = FastAPI("PDF Processor\nFastAPI")
         #validation = Python("Validation")
         NuogatAPIServer = Server("NuogatAPIServer")
-        PyPDF=FastAPI("PyPDF on FastAPI")
+        PyPDF=FastAPI("PyPDF on\nFastAPI")
+        create_model_api = FastAPI("Content\nSegmentation")
 
     # Define the Model Creation process
-    with Cluster("Model Creation"):
-        create_model_api = FastAPI("/createModel API")
-        fine_tuned_model = Python("Fine-tuned Model")
+    with Cluster("Fine-tuned Model"):
+        openAI = Custom("openAI", "./images/openai.png")
+        context = Custom("context retrival\nmodel", "./images/model.png")
 
     # Define the ChatBot and endpoint
-    with Cluster("ChatBot"):
+    with Cluster("ChatBot FrontEnd"):
+        chat_answer_api = FastAPI("getChatAnswer\nFastAPI")
         chat_bot = Custom("Personal ChatBot", "./images/streamlit.png")
-        chat_answer_api = FastAPI("/getChatAnswer API")
 
     # Add connection links
     user >>Edge(label="PDF links")>> app
@@ -37,6 +38,7 @@ with Diagram("QA Chatbot for PDFs Architecture", show=False, direction="LR", out
     fastapi>>Edge(label="Processor=Nougat")>>NuogatAPIServer
     NuogatAPIServer >>Edge(label=".mmd file")>> create_model_api
     PyPDF>>Edge(label=".mmd file")>>create_model_api
-    create_model_api >> Edge(label="jsonl")>>fine_tuned_model>>chat_bot
-    chat_bot >> Edge(label="Question")>>chat_answer_api
-    chat_answer_api>>Edge(label="Answer")>>chat_bot
+    create_model_api >> Edge(label="csv")>>context>>Edge()<<chat_answer_api
+    chat_answer_api >> Edge(label="Question")>>chat_bot
+    chat_bot>>Edge(label="Answer")>>chat_answer_api
+
