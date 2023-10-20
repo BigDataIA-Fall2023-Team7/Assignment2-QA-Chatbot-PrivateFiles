@@ -2,17 +2,21 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
-from .processpdf import ProcessPDF
 import pandas as pd
 from dotenv import load_dotenv
 import os
 import openai
 import time
 
+from .processpdf import ProcessPDF
+from .chatanswer import ask
+
+
 load_dotenv()
 FILE_CACHE = os.getenv("FILE_CACHE")
 OPEN_API_KEY = os.getenv("OPEN_API_KEY")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")
+FT_MODEL = os.getenv("FT_MODEL")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 class CreateModelRequestPayload(BaseModel):
@@ -117,9 +121,9 @@ def chat(chatQuestion: ChatQuestion):
         """
         TODO: Run the process to create the model.
         """
-
-        # chatanswer = uddhavFunction(chatQuestion.chatQuestion, modelNameFromEnv, CONTEXT_DF_FILELOCATION)
+        SearchContextFile = FILE_CACHE + 'CombinedChunksDF.csv'
+        chatanswer = ask(chatQuestion.chatQuestion, SearchContextFile, FT_MODEL)
                 
-        return JSONResponse(content={'chatQuestion': chatQuestion.chatQuestion, 'chatAnswer': 'This is your answer from fine-tuned chatbot model!'}, status_code=200)
+        return JSONResponse(content={'chatQuestion': chatQuestion.chatQuestion, 'chatAnswer': chatanswer}, status_code=200)
     else:
         raise HTTPException(status_code=400, detail={'message':'Inorder to get answer from chatbot, please supply a question.'})
