@@ -13,6 +13,7 @@ openai = "*"
 tiktoken = "*"
 scipy = "*"
 httpx = "*"
+gunicorn = "*"
 
 [dev-packages]
 uvicorn = "*"
