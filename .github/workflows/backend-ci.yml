@@ -1,4 +1,4 @@
-name: fastapi-ci # TODO: change to your workflow name
+name: backend-ci # TODO: change to your workflow name
 
 on:  
   push:
